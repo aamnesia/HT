@@ -1,5 +1,6 @@
 class Train
-  attr_reader :speed, :wagons, :current_station, :current_route
+  attr_accessor :speed, :wagons
+  attr_reader :current_station, :current_route
 
   def initialize(number, type, wagons)
     @number = number
@@ -18,40 +19,45 @@ class Train
 
   def hook_wagon
     if @speed == 0
-      self.wagons += 1
+      @wagons += 1
     end
   end
 
   def unhook_wagon
     if @speed == 0
-      self.wagons -= 1
+      @wagons -= 1
     end
   end
 
   def follow_route(route)
-    @current_index = 0
-    self.current_route = route
-    self.current_station = current_route.route(@current_index)
+    @current_route = route
+    @current_station = @current_route.stations[0]
   end
 
   def go_back
-    if current_station != current_route.route.first
-      @current_index -= 1
-      self.current_station = current_route.route[@current_index]
+    if self.previous_station
+      @current_station = self.previous_station
+    end
   end
 
   def go_forward
-    if current_station != current_route.route.last
-      @current_index += 1
-      self.current_station = current_route.route[@current_index]
+    if self.next_station
+      @current_station = self.next_station
+    end
   end
 
   def previous_station
-    current_route.route(@current_index - 1)
+    if @current_station != @current_route.stations.first
+      @current_index = @current_route.stations.find_index(@current_station)
+      @current_route.stations[@current_index - 1]
+    end
   end
 
   def next_station
-    current_route.route(@current_index + 1)
+    if @current_station != @current_route.stations.last
+      @current_index = @current_route.stations.find_index(@current_station)
+      @current_route.stations[@current_index + 1]
+    end
   end
 
 end
