@@ -48,15 +48,15 @@ class Train
 
   def previous_station
     if @current_station != @current_route.stations.first
-      @current_index = @current_route.stations.find_index(@current_station)
-      @current_route.stations[@current_index - 1]
+      current_index = @current_route.stations.find_index(@current_station)
+      @current_route.stations[current_index - 1]
     end
   end
 
   def next_station
     if @current_station != @current_route.stations.last
-      @current_index = @current_route.stations.find_index(@current_station)
-      @current_route.stations[@current_index + 1]
+      current_index = @current_route.stations.find_index(@current_station)
+      @current_route.stations[current_index + 1]
     end
   end
 
