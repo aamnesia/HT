@@ -37,7 +37,7 @@ class Operations
   private
 
   def create_station
-    puts "Введите название станции: "
+    print "Введите название станции: "
     station_name = gets.chomp
     @stations << Station.new(station_name)
 
