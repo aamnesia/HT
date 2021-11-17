@@ -1,9 +1,11 @@
 class Train
   require_relative 'modules'
-  include Manufacturer
-  include InstanceCounter
+  include Manufacturer, InstanceCounter
   attr_accessor :speed, :wagons
   attr_reader :current_station, :current_route, :type, :number
+
+  NUMBER_FORMAT = /\A[а-я0-9]{3}-?[а-я0-9]{2}\z/i
+  @@trains = {}
 
   def initialize(number, type)
     @number = number
@@ -11,10 +13,9 @@ class Train
     @wagons = []
     @speed = 0
     @@trains[@number] = self
+    validate!
     register_instance
   end
-
-  @@trains = []
 
   def find(number)
     @@trains[number]
@@ -31,14 +32,12 @@ class Train
   def hook_wagon(wagon)
     if @speed == 0 && @type == wagon.type
       @wagons << wagon
-      puts "Вагон прицеплен!"
     end
   end
 
   def unhook_wagon(wagon)
     if @speed == 0
       @wagons.delete(wagon)
-      puts "Вагон отцеплен!"
     end
   end
 
@@ -73,4 +72,16 @@ class Train
     end
   end
 
+  def valid?
+    validate!
+    true
+  rescue
+    false
+  end
+
+  protected
+
+  def validate!
+    raise "Недопустимый формат номера поезда" if @number !~ NUMBER_FORMAT
+  end
 end

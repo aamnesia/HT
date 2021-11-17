@@ -1,8 +1,6 @@
-class PassengerWagon
-  include Manufacturer
-  attr_reader :type, :number
-  def initialize(number)
-    @type = :passenger
-    @number = number
+require_relative 'wagon'
+class PassengerWagon < Wagon
+  def initialize(number, type = :passenger)
+    super
   end
 end

@@ -2,9 +2,10 @@ require_relative 'route'
 require_relative 'station'
 require_relative 'train'
 require_relative 'cargo_train'
+require_relative 'wagon'
+require_relative 'pas_wagon'
 require_relative 'cargo_wagon'
 require_relative 'pas_train'
-require_relative 'pas_wagon'
 require_relative 'menu_text'
 
 class Operations
@@ -45,20 +46,28 @@ class Operations
   end
 
   def create_train
-    print "Введите номер поезда: "
-    number = gets.chomp
-
-    print TRAIN_TYPE_CHOICE
-    chosen_type = gets.chomp.to_i
-
-    if chosen_type == 1
-      train = PassengerTrain.new(number)
-    elsif chosen_type == 2
-      train = CargoTrain.new(number)
+    begin
+      print TRAIN_TYPE_CHOICE
+      chosen_type = gets.chomp.to_i
+      raise unless chosen_type == 1 || chosen_type == 2
+    rescue
+      puts "Введите 1 или 2"
+      retry
     end
-    @trains << train
 
-    puts "#{train.type_name} поезд номер #{train.number} создан!"
+    begin
+      print "Введите номер поезда: "
+      number = gets.chomp
+
+      train = PassengerTrain.new(number) if chosen_type == 1
+      train = CargoTrain.new(number) if chosen_type == 2
+      @trains << train
+    rescue
+      puts "Неправильный формат номера поезда. Попробуйте ещё раз)"
+      retry
+    else
+      puts "#{train.type_name} поезд номер #{train.number} создан!"
+    end
   end
 
   def create_route
@@ -90,8 +99,13 @@ class Operations
   def change_route
     loop do
       print ROUTE_MENU
-
-      route_operation = gets.chomp.to_i
+      begin
+        route_operation = gets.chomp.to_i
+        raise unless (0..3).include?(route_operation)
+      rescue
+        puts "Введите 1, 2, 3 или 0"
+        retry
+      end
 
       case route_operation
       when 1 then self.create_route
@@ -122,25 +136,30 @@ class Operations
       wagon = CargoWagon.new(wagon_number)
       train.hook_wagon(wagon)
     end
+    puts "Вагон #{wagon.number} прицеплен!"
   end
 
   def unhook_wagon
     train = choose_train
     wagon = choose_wagon(train)
     train.unhook_wagon(wagon)
+    puts "Вагон #{wagon.number} отцеплен!"
   end
 
   def move_train
     train = choose_train
     if train.current_route
-      puts MOVING_TRAIN
-      direction = gets.chomp.to_i
-
-      if direction == 1
-        train.go_forward
-      elsif direction == 2
-        train.go_back
+      begin
+        puts MOVING_TRAIN
+        direction = gets.chomp.to_i
+        raise unless direction == 1 || direction == 2
+      rescue
+        puts "Можно ввести только 1 или 2"
+        retry
       end
+      train.go_forward if direction == 1
+      train.go_back if direction == 2
+
       print "Поезд прибыл на станцию #{train.current_station.station_name}"
     else
       puts "Поезду не назначен маршрут("
@@ -155,26 +174,58 @@ class Operations
   end
 
   def choose_route
-    puts "Выберите маршрут:"
-    @routes.each_index { |index| puts "#{index + 1} - #{@routes[index].route_name}" }
-    @routes[gets.chomp.to_i - 1]
+    begin
+      puts "Выберите маршрут из списка:"
+      @routes.each_index { |index| puts "#{index + 1} - #{@routes[index].route_name}" }
+      entered_index = gets.chomp.to_i
+      allowed_indexes = (1..@routes.length).to_a
+      raise if !allowed_indexes.include?(entered_index)
+      @routes[entered_index - 1]
+    rescue
+      puts "Маршрут не найден"
+      retry
+    end
   end
 
   def choose_train
-    puts "Выберите поезд:"
-    @trains.each_index { |index| puts "#{index + 1} - #{@trains[index].type_name} поезд номер #{@trains[index].number}" }
-    @trains[gets.chomp.to_i - 1]
+    begin
+      puts "Выберите поезд из списка:"
+      @trains.each_index { |index| puts "#{index + 1} - #{@trains[index].type_name} поезд номер #{@trains[index].number}" }
+      entered_index = gets.chomp.to_i
+      allowed_indexes = (1..@trains.length).to_a
+      raise if !allowed_indexes.include?(entered_index)
+      @trains[entered_index - 1]
+    rescue
+      puts "Поезд не найден"
+      retry
+    end
   end
 
   def choose_wagon(train)
-    puts "Выберите вагон:"
-    train.wagons.each_index { |index| puts "#{index + 1} - #{train.wagons[index].number}"}
-    train.wagons[gets.chomp.to_i - 1]
+    begin
+      puts "Выберите вагон из списка:"
+      train.wagons.each_index { |index| puts "#{index + 1} - #{train.wagons[index].number}"}
+      entered_index = gets.chomp.to_i
+      allowed_indexes = (1..train.wagons.length).to_a
+      raise if !allowed_indexes.include?(entered_index)
+      train.wagons[entered_index - 1]
+    rescue
+      puts "Вагон не найден"
+      retry
+    end
   end
 
   def choose_station
-    @stations.each_index { |index| puts "#{index + 1} - #{@stations[index].station_name}"}
-    @stations[gets.chomp.to_i - 1]
+    begin
+      @stations.each_index { |index| puts "#{index + 1} - #{@stations[index].station_name}"}
+      entered_index = gets.chomp.to_i
+      allowed_indexes = (1..@stations.length).to_a
+      raise if !allowed_indexes.include?(entered_index)
+      @stations[entered_index - 1]
+    rescue
+      puts "Станция не найдена. Попробуйте ещё раз)"
+      retry
+    end
   end
 end
 

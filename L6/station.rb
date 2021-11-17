@@ -3,10 +3,12 @@ class Station
   include InstanceCounter
   attr_reader :station_name
 
+  NAME_FORMAT = /^[а-я0-9]+$/i
   def initialize(station_name)
     @station_name = station_name
     @trains = []
     @@stations << self
+    validate!
     register_instance
   end
 
@@ -31,5 +33,18 @@ class Station
   def each_type(type)
     each_type = @trains.find_all{ |train| train.type == type }
     each_type.size
+  end
+
+  def valid?
+    validate!
+    true
+  rescue
+    false
+  end
+
+  protected
+
+  def validate!
+    raise "У станции должно быть название" if @station_name !~ NAME_FORMAT
   end
 end
