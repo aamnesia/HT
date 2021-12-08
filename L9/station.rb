@@ -1,17 +1,22 @@
 class Station
   require_relative 'modules'
-  include InstanceCounter
+  require_relative 'accessors_validation_modules'
+
+  include InstanceCounter, Validation
 
   attr_reader :station_name
+
+  validate :station_name, :presence
 
   STATION_NAME_FORMAT = /^[а-я0-9]+$/i.freeze
 
   @@stations = []
 
+
   def initialize(station_name)
+    validate!
     @station_name = station_name
     @trains = []
-    validate!
     @@stations << self
     register_instance
   end
@@ -39,18 +44,5 @@ class Station
   def each_type(type)
     each_type = @trains.find_all { |train| train.type == type }
     each_type.size
-  end
-
-  def valid?
-    validate!
-    true
-  rescue StandardError
-    false
-  end
-
-  protected
-
-  def validate!
-    raise 'У станции должно быть название' if @station_name !~ STATION_NAME_FORMAT
   end
 end

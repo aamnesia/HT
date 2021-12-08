@@ -1,21 +1,24 @@
 class Train
   require_relative 'modules'
-  include InstanceCounter
-  include Manufacturer
+  require_relative 'accessors_validation_modules'
+  include InstanceCounter, Manufacturer, Validation
+
 
   attr_accessor :speed, :wagons
   attr_reader :current_station, :current_route, :type, :number
 
   TRAIN_NUMBER_FORMAT = /\A[а-я0-9]{3}-?[а-я0-9]{2}\z/i.freeze
 
+  validate :number, :format, TRAIN_NUMBER_FORMAT
+
   @@trains = {}
 
   def initialize(number, type)
+    #validate!
     @number = number
     @type = type
     @wagons = []
     @speed = 0
-    validate!
     @@trains[@number] = self
     register_instance
   end
@@ -78,18 +81,5 @@ class Train
       current_index = @current_route.stations.find_index(@current_station)
       @current_route.stations[current_index + 1]
     end
-  end
-
-  def valid?
-    validate!
-    true
-  rescue StandardError
-    false
-  end
-
-  protected
-
-  def validate!
-    raise 'Недопустимый формат номера поезда' if @number !~ TRAIN_NUMBER_FORMAT
   end
 end

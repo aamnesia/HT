@@ -36,17 +36,17 @@ module Validation
 
   module ClassMethods
     attr_reader :validations
-
     def validate(name, validation_type, *arguments)
       @validations ||= []
-      @validations << { name: name, type: type, args: arguments }
+      @validations << { name: name, type: validation_type, args: arguments }
     end
   end
 
   module InstanceMethods
     def valid?
       validate!
-      raise
+      true
+    rescue StandardError
       false
     end
 
@@ -60,11 +60,15 @@ module Validation
     end
 
     def presence(name, attribute, _args)
-      raise ArgumentError if attribute.nil? || attribute.empty?
+      raise ArgumentError, "Аргумент #{name} не может быть пустым" if attribute.nil? || attribute.empty?
+    end
+
+    def type(name, attribute, attr_class)
+      raise ArgumentError, "Аргумент #{name} не соответствует классу #{attr_class[0]}" unless attribute.is_a? attr_class[0]
     end
 
     def format(name, attribute, regexp)
-      raise ArgumentError if attribute !~ regexp[0]
+      raise ArgumentError, "Аргумент #{name} не соответствует формату" if attribute !~ regexp[0]
     end
   end
 end
